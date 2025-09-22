@@ -1,0 +1,23 @@
+# Bet365 Odds Scraper Requirements
+# Core dependencies for the refactored scraper
+
+# Web scraping and browser automation
+patchright>=1.47.0
+
+# AI/ML for odds extraction
+google-generativeai>=0.8.0
+
+# Data handling and processing
+asyncio-throttle>=1.0.2
+
+# Logging and utilities
+colorlog>=6.8.0
+
+# Development and testing (optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Note: Install with: pip install -r requirements.txt
+# For development: pip install -r requirements.txt pytest pytest-asyncio black flake8
