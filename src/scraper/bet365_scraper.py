@@ -13,9 +13,10 @@ from ..ai.client import AIClient
 from ..ai.extractor import AIExtractor
 from ..utils.logger import Logger
 from ..utils.helpers import RetryHelper, DelayHelper, DataHelper
+from ..utils.constants import PREMATCH_TO_LIVE_MAPPING, LIVE_STREAMING_URL, LIVE_SCHEDULE_URL
 from ..utils.constants import (
     SPORT_CODES, DEFAULT_SPORT_CODES, MARKET_TYPES, 
-    BROWSER_CONFIG, RETRY_CONFIG
+    BROWSER_CONFIG, RETRY_CONFIG, PREMATCH_TO_LIVE_MAPPING
 )
 from ..utils.dynamic_detection import get_dynamic_stats
 
@@ -63,13 +64,12 @@ class Bet365Scraper:
             return False
     
     async def start_browser(self):
-        """Start browser with persistent context"""
+        """Start browser with enhanced stealth capabilities"""
         try:
             playwright = await async_playwright().start()
             
+            # Use enhanced browser configuration with stealth capabilities
             browser_options = BrowserConfig.get_browser_options()
-            browser_options['user_data_dir'] = BROWSER_CONFIG['user_data_dir']
-            
             self.browser = await playwright.chromium.launch_persistent_context(**browser_options)
             
             # Setup request interception for API discovery
@@ -77,13 +77,14 @@ class Bet365Scraper:
             
             self.page = await self.browser.new_page()
             
-            # Set random user agent
-            user_agent = DelayHelper.get_random_user_agent()
-            await self.page.set_extra_http_headers({
-                'User-Agent': user_agent
-            })
+            # Add stealth scripts to avoid detection
+            await BrowserConfig.add_stealth_scripts(self.page)
             
-            self.logger.info("[+] Browser started successfully")
+            # Set enhanced headers and user agent
+            context_options = BrowserConfig.get_context_options()
+            await self.page.set_extra_http_headers(context_options['extra_http_headers'])
+            
+            self.logger.info("[+] Browser started successfully with stealth capabilities")
             return True
             
         except Exception as e:
@@ -230,7 +231,14 @@ class Bet365Scraper:
     
     async def navigate_to_sport(self, sport_code: str, market_type: str = "AS"):
         """Navigate to specific sport page"""
-        url = f"{self.config.base_url}{market_type}/{sport_code}"
+        if market_type == "IP":
+            # For live games, use the correct live URL pattern: #/IP/B16, #/IP/B18, etc.
+            from ..utils.constants import PREMATCH_TO_LIVE_MAPPING
+            live_code = PREMATCH_TO_LIVE_MAPPING.get(sport_code, sport_code)
+            url = f"https://www.co.bet365.com/#/IP/{live_code}"
+        else:
+            # For prematch, use traditional URL pattern: #/HO/AS/B1, etc.
+            url = f"{self.config.base_url}{market_type}/{sport_code}"
         
         return await RetryHelper.retry_async(
             self._navigate_with_retry,
@@ -478,3 +486,51 @@ class Bet365Scraper:
             'runtime_seconds': runtime,
             'matches_per_minute': len(self.all_matches) / (runtime / 60) if runtime > 0 else 0
         }
+
+    async def scrape_live_streaming(self) -> List[Dict]:
+        """Scrape all live streaming events"""
+        try:
+            if not self.page:
+                self.logger.error("[!] Browser page not available")
+                return []
+                
+            self.logger.info("[+] Navigating to live streaming page...")
+            await self.page.goto(LIVE_STREAMING_URL, wait_until='networkidle', timeout=30000)
+            
+            # Wait for content to load
+            await asyncio.sleep(3)
+            
+            # Parse streaming events
+            content = await self.page.content()
+            streaming_events = await self.html_parser.parse_live_streaming(content)
+            
+            self.logger.info(f"[+] Found {len(streaming_events)} live streaming events")
+            return streaming_events
+            
+        except Exception as e:
+            self.logger.error(f"[!] Error scraping live streaming: {e}")
+            return []
+
+    async def scrape_live_schedule(self) -> List[Dict]:
+        """Scrape live schedule"""
+        try:
+            if not self.page:
+                self.logger.error("[!] Browser page not available")
+                return []
+                
+            self.logger.info("[+] Navigating to live schedule page...")
+            await self.page.goto(LIVE_SCHEDULE_URL, wait_until='networkidle', timeout=30000)
+            
+            # Wait for content to load
+            await asyncio.sleep(3)
+            
+            # Parse schedule
+            content = await self.page.content()
+            schedule_events = await self.html_parser.parse_live_schedule(content)
+            
+            self.logger.info(f"[+] Found {len(schedule_events)} scheduled events")
+            return schedule_events
+            
+        except Exception as e:
+            self.logger.error(f"[!] Error scraping live schedule: {e}")
+            return []

@@ -12,20 +12,45 @@ SPORT_CODES = {
     'B10': 'Handball',
     'B11': 'Volleyball',
     'B12': 'Rugby',
-    'B13': 'Soccer',  # Changed from American Football based on actual data
+    'B13': 'Tennis',  # Live tennis
     'B14': 'Boxing',
-    'B15': 'MMA',
-    'B16': 'Formula 1',
+    'B15': 'Darts',   # Live darts
+    'B16': 'Baseball',  # Live baseball
     'B17': 'Cycling',
-    'B18': 'Darts',
+    'B18': 'Basketball',  # Live basketball
     'B19': 'Bowls',
     'B20': 'Badminton',
     'B21': 'Squash',
     'B22': 'Table Tennis',
+    'B91': 'Volleyball',  # Live volleyball
+    'B92': 'Table Tennis', # Live table tennis
+    'B151': 'Esports',     # Live esports
 }
 
-# Default sport codes to scrape
-DEFAULT_SPORT_CODES = ['B1', 'B2', 'B3', 'B4', 'B8', 'B9', 'B13']
+# Mapping from prematch sport codes to live sport codes
+PREMATCH_TO_LIVE_MAPPING = {
+    'B1': 'B1',   # Soccer/Football -> Live Soccer
+    'B2': 'B18',  # Basketball -> Live Basketball
+    'B3': 'B3',   # Cricket -> Live Cricket
+    'B4': 'B13',  # Tennis -> Live Tennis
+    'B5': 'B5',   # Golf -> Live Golf (assuming same)
+    'B6': 'B6',   # Ice Hockey -> Live Ice Hockey (assuming same)
+    'B7': 'B7',   # Snooker -> Live Snooker (assuming same)
+    'B8': 'B8',   # American Football -> Live American Football (assuming same)
+    'B9': 'B16',  # Baseball -> Live Baseball
+    'B13': 'B13', # Tennis -> Live Tennis
+    'B15': 'B15', # Darts -> Live Darts
+    'B22': 'B92', # Table Tennis -> Live Table Tennis
+    'B11': 'B91', # Volleyball -> Live Volleyball
+    'B151': 'B151', # Esports -> Live Esports
+}
+
+# Special live URLs
+LIVE_STREAMING_URL = "https://www.co.bet365.com/#/IP/STREAMING"
+LIVE_SCHEDULE_URL = "https://www.co.bet365.com/#/IP/SCHEDULE"
+
+# Default sport codes to scrape - comprehensive list including live-specific sports
+DEFAULT_SPORT_CODES = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B13', 'B15', 'B22', 'B11', 'B151']
 
 # Market types
 MARKET_TYPES = {

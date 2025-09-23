@@ -16,6 +16,8 @@ class Match:
     match_type: str
     timestamp: str
     source_url: Optional[str] = None
+    line_id: Optional[str] = None
+    money_line_id: Optional[str] = None
     
     # Live betting fields
     is_live: bool = False
@@ -25,7 +27,8 @@ class Match:
     @classmethod
     def create(cls, home_team: str, away_team: str, league: str, sport: str = "Unknown",
                match_time: str = "unknown", odds: Optional[Dict] = None, 
-               match_type: str = "prematch", source_url: Optional[str] = None) -> 'Match':
+               match_type: str = "prematch", source_url: Optional[str] = None,
+               line_id: Optional[str] = None, money_line_id: Optional[str] = None) -> 'Match':
         """Create a new Match instance with generated match_id"""
         # Use sport as base for ID since it's more stable than league (league can be mis-detected)
         base_sport = sport if sport and sport != 'Unknown' else league
@@ -42,7 +45,9 @@ class Match:
             odds=odds or {},
             match_type=match_type,
             timestamp=datetime.now(timezone.utc).isoformat(),
-            source_url=source_url
+            source_url=source_url,
+            line_id=line_id,
+            money_line_id=money_line_id
         )
     
     def to_dict(self) -> Dict:
@@ -59,6 +64,12 @@ class Match:
             "timestamp": self.timestamp,
             "source_url": self.source_url
         }
+        
+        # Add line IDs if present
+        if self.line_id:
+            result["line_id"] = self.line_id
+        if self.money_line_id:
+            result["money_line_id"] = self.money_line_id
         
         # Add live betting fields if present
         if self.is_live:
