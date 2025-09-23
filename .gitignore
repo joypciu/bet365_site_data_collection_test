@@ -113,6 +113,7 @@ dmypy.json
 
 # Project specific
 bet365_scraper.log
+<<<<<<< HEAD
 bet365_data.json
 config.json
 api key.txt
@@ -129,6 +130,10 @@ pw_profile/
 # Sensitive files
 api key.txt
 *.key
+=======
+pw_profile/
+config.json
+>>>>>>> a8ab2463fd11289d44fe84ccf468ee58ed3b9907
 
 # IDE
 .vscode/
